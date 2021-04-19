@@ -1,14 +1,22 @@
 import { app } from './app';
 import * as http from 'http';
 import { logger } from './loggers/Logger';
-import socketIo from 'socket.io';
+import {Server, Socket} from 'socket.io';
+import * as dotenv from 'dotenv';
 
+dotenv.config();
+const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 
 // Creating socket server
-const io = new socketIo.Server(server);
+const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    }
+});
 
-const getApiAndEmit = (socket: socketIo.Socket) => {
+const getApiAndEmit = (socket: Socket) => {
   const response = new Date();
   // Emitting a new message. Will be consumed by the client
   socket.emit("FromAPI", response);
@@ -16,7 +24,7 @@ const getApiAndEmit = (socket: socketIo.Socket) => {
 
 let interval: NodeJS.Timeout;
 
-io.on("connection", (socket: socketIo.Socket) => {
+io.on("connection", (socket: Socket) => {
   console.log("New client connected");
   if (interval) {
     clearInterval(interval);
@@ -28,8 +36,8 @@ io.on("connection", (socket: socketIo.Socket) => {
   });
 });
 
-
-server.listen(); // although it is not necessary its required if we need to use some other techs like sockets
+// When socket io you start listening here NOT IN THE APP!!
+server.listen(4000); // although it is not necessary its required if we need to use some other techs like sockets
 
 process.on('SIGTERM', () => {
   logger.debug('SIGTERM signal received: closing HTTP server');
