@@ -5,13 +5,14 @@ import {Server, Socket} from 'socket.io';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
+
 const port = process.env.PORT || 4000;
 const server = http.createServer(app);
 
 // Creating socket server
 const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: "http://localhost:3000",
       methods: ["GET", "POST"],
     }
 });
@@ -37,7 +38,10 @@ io.on("connection", (socket: Socket) => {
 });
 
 // When socket io you start listening here NOT IN THE APP!!
-server.listen(4000); // although it is not necessary its required if we need to use some other techs like sockets
+server.listen(port, () => {
+  console.log(`Listening on port: ${port}`);
+  
+});
 
 process.on('SIGTERM', () => {
   logger.debug('SIGTERM signal received: closing HTTP server');
